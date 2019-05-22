@@ -52,3 +52,21 @@ What if our business rules change and now we can have more than one employee wit
 
 ## Many to Many Relationships
 
+Before you begin reading about this topic it's important that you understand `one-to-one and one-to-many relationships` and know how to implement them. Once you understand these topics proceed with this topic. 
+
+Now what exactly is a `many-to-many relationship`? To understand this topic let's take a look at our dataset at the top of this article. In our dataset we have the concept of 3-types of phone numbers: home, mobile and work. This means that a single employee can have 1, 2 or 3 phone numbers (i.e. one-to-many). However upon closer inspection we can see that the same home phone number exists for the first two employees which suggests a phone number can have 1 or more employees associated with it as well. So based on these two relationships we now have a `many-to-many relationship`. 
+
+Now if we use the same rules as above in the `one-to-many relationship` to build relationship will we create lots of duplicate records? If you answered yes you are correct. In fact there is no way to relate the two tables in both directions without creating new fields in each table that reference the other table. In the example below I show exactly what I mean. Wait... what's wrong with this dataset now? Well first off if we look at the data we can see the duplication in both tables is out of control. Split each phone number into it's own row with it's own id and each row is assigned to exactly one employee. The same thing happens in the employee table. Now if you are paying attention you will noticed another big problem that will actually prevent us from implementing this solution. The employee_id cannot be duplicated becuase it's a `primary key` which means it cannot be duplicated... So what now? 
+
+![incorrect-many-to-many-relationship](https://raw.githubusercontent.com/rydevops/SimpleORM/master/incorrect-many-to-many.png)
+
+Another common solution to this problem is to store a comma-seperated list of employee IDs in the phone number table. In theory this works however this doesn't make searching any easier. In fact this makes it harder because there is no methods in SQL that do splits and searched for you. If you pull this into an application it means you have to pull all the data in and extract only the data you want. Why do extra work!
+
+So I know what you are asking. What is the solution to this problem? The answer is simple. If you have a `many-to-many relationship` such as this you need to create a third relationship table called a bridging table. This table servers one purpose (usually) and that is to create a one-to-one mapping between the two tables (Employee and Phone). In the example below I created a third table called EmployeePhoneNumber (often the convention is to name it after the two tables it maps) and removed reference fields from the Employee and Phone number table. Whenever we create a new employee and a new address we will now also create a mapping entry using the two primary keys from the Employee table and the Phone number table. Now we only ever need to store the phone number once and using the bridge table we can two entries (one for each employee). For example, for employee id 66100 we'd have an entry in the mapping table for 66100 (employee_id) and 1 (phone_id) and for employee 66101 we'd have one entry of 66101 (employee_id) and 1 (phone_id) to reference the same home phone number. Using these tables we can join the two tables by simply using the mapping entries in the bridge table. Best of all we have no duplication of data!
+
+![correct-many-to-many](https://raw.githubusercontent.com/rydevops/SimpleORM/master/correct-many-to-many.png)
+
+*Mapping the Employee table to the Phone number table using a bridge table*
+
+
+
