@@ -31,4 +31,24 @@ Although the above example is not completely truthful (e.g. more than 1 employee
 
 The diagram below shows a snippet of our database tables constructed using an employee and address table:
 ![one-to-one relationship](https://raw.githubusercontent.com/rydevops/SimpleORM/master/one-to-one.png)
+
 The single-dash through the line on each side stands for 1 (i.e. 1-to-1). 
+
+## One-to-One and One-to-Many Relationships
+
+When creating tables from a dataset we need to consider the different types of relationships between these tables. For this discussion we will talk about `one-to-one relationships` and `one-to-many relationships`. There is a third relationship called a `many-to-many relationship` which is a bit more complex and will have its own section. 
+
+In our example above we create a `one-to-one relationship` by saying a single employee has at most one address and one address has at most one employee. This is often referred to as a business constraint and in this case the business is essentially stating that they will never have an two employees with the same address. When this type of relationship is created often the `primary key` and `foreign key` exists and are both marked as `unique non-null keys`. If we try to insert a second record with a `foreign key` that already exists in our application/database we will be deny the transaction as this breaks the relationship. 
+
+What if our business rules change and now we can have more than one employee with the same house address (e.g. A brother and a sister now work for our business)? We now need to create a new relationship called a `one-to-many` relationship. In this new relationship which table has the many records and which table as the single record? This is often up for debate depending on the table however in our case the decision is simple. To figure out which table has the many side (or has more than one record) ask yourself which table should I create a record in such that I don't duplicate my data? For example, assuming we think our Address table should be the many side what would that look like? In the table below we created two address records referencing the two employees who live at the same address. Do we have duplicate data in either table now? Yes we do. The Address table is storing the same address information twice and the only field that is unique is the address id. In this case, our assumption is incorrect. If we were to read this relationship from left-to-right we are saying one employee is associated with one address (based on `primary/foreign keys`) and so this is still a one-to-one relationship. So instead of adding the employee_id to the address table we will add the address_id to the employee record instead. In the image below (second figure) we can now see that the only thing duplicated is the address_id in the employee table and this is exactly what we want. In this case we have created a many-to-one relationship (which is the same thing as a one-to-many just read in reverse order). If we read this from right-to-left now we can say an address can have one or more employees associated with it (i.e. one-to-many relationship)
+
+![incorrect-one-to-many-relationship](https://raw.githubusercontent.com/rydevops/SimpleORM/master/incorrect-one-to-many.png)
+
+*incorrect one-to-many relationship*
+
+![correct-one-to-many-relationship](https://raw.githubusercontent.com/rydevops/SimpleORM/master/correct-one-to-many.png)
+
+*correct one-to-many relationship*
+
+## Many to Many Relationships
+
